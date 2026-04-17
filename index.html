@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+    <style>
+        :root {
+            --bg: #f4f4f9;
+            --card: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #007acc;
+            --accent-hover: #005f99;
+            --result: #e9ecef;
+            --input-bg: #ffffff;
+        }
+
+        body.dark {
+            --bg: #0f172a;
+            --card: #111827;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --result: #0b1220;
+            --input-bg: #0b1220;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(180deg, var(--bg) 0%, #dbe4f7 100%);
+            color: var(--text);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 250ms ease, color 250ms ease;
+        }
+
+        .calculator {
+            width: min(420px, calc(100vw - 32px));
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 18px 60px rgba(15, 23, 42, 0.15);
+            overflow: hidden;
+        }
+
+        .calculator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px 10px;
+        }
+
+        .calculator-header h1 {
+            font-size: 1.3rem;
+            margin: 0;
+        }
+
+        .theme-toggle {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            border-radius: 999px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 150ms ease, color 150ms ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .calculator-body {
+            padding: 0 24px 24px;
+        }
+
+        .display-card {
+            background: var(--result);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px 20px;
+            margin-bottom: 18px;
+        }
+
+        .display-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .display-card h2 {
+            margin: 8px 0 0;
+            font-size: 2rem;
+            word-break: break-word;
+        }
+
+        .input-group {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .operations {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .op-button {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 0;
+            font-size: 1rem;
+            cursor: pointer;
+            background: var(--border);
+            color: var(--text);
+            transition: transform 150ms ease, background 150ms ease;
+        }
+
+        .op-button:hover {
+            transform: translateY(-1px);
+            background: rgba(0, 122, 204, 0.15);
+        }
+
+        .op-button.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .calculate-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 150ms ease;
+        }
+
+        .calculate-button:hover {
+            background: var(--accent-hover);
+        }
+
+        .history-card {
+            margin-top: 14px;
+            padding: 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .history-card h3 {
+            margin: 0 0 10px;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 120px;
+            overflow: auto;
+        }
+
+        .history-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            font-size: 0.95rem;
+        }
+
+        .history-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="calculator-header">
+            <h1>Calculator</h1>
+            <button class="theme-toggle" id="themeToggle" type="button">🌙 Dark</button>
+        </div>
+
+        <div class="calculator-body">
+            <div class="display-card">
+                <p>Result</p>
+                <h2 id="resultDisplay">0</h2>
+            </div>
+
+            <div class="input-group">
+                <label for="num1">First Number</label>
+                <input type="number" id="num1" step="any" />
+            </div>
+
+            <div class="input-group">
+                <label for="num2">Second Number</label>
+                <input type="number" id="num2" step="any" />
+            </div>
+
+            <div class="operations">
+                <button class="op-button active" data-op="1">+</button>
+                <button class="op-button" data-op="2">−</button>
+                <button class="op-button" data-op="3">×</button>
+                <button class="op-button" data-op="4">÷</button>
+            </div>
+
+            <button class="calculate-button" id="calculateBtn">Calculate</button>
+
+            <div class="history-card">
+                <h3>History</h3>
+                <ul class="history-list" id="historyList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const resultDisplay = document.getElementById("resultDisplay");
+        const historyList = document.getElementById("historyList");
+        const buttons = document.querySelectorAll(".op-button");
+        const calculateBtn = document.getElementById("calculateBtn");
+        const num1Input = document.getElementById("num1");
+        const num2Input = document.getElementById("num2");
+        const themeToggle = document.getElementById("themeToggle");
+
+        let selectedOperation = "1";
+
+        buttons.forEach((button) => {
+            button.addEventListener("click", () => {
+                buttons.forEach((btn) => btn.classList.remove("active"));
+                button.classList.add("active");
+                selectedOperation = button.dataset.op;
+            });
+        });
+
+        function add(x, y) { return x + y; }
+        function subtract(x, y) { return x - y; }
+        function multiply(x, y) { return x * y; }
+        function divide(x, y) {
+            if (y === 0) return "Error! Division by zero.";
+            return x / y;
+        }
+
+        function calculate() {
+            const num1 = num1Input.value.trim();
+            const num2 = num2Input.value.trim();
+
+            if (num1 === "" || num2 === "") {
+                resultDisplay.textContent = "Enter both numbers";
+                return;
+            }
+
+            const x = parseFloat(num1);
+            const y = parseFloat(num2);
+            let result;
+
+            switch (selectedOperation) {
+                case "1":
+                    result = add(x, y);
+                    break;
+                case "2":
+                    result = subtract(x, y);
+                    break;
+                case "3":
+                    result = multiply(x, y);
+                    break;
+                case "4":
+                    result = divide(x, y);
+                    break;
+                default:
+                    result = "Invalid operation";
+            }
+
+            resultDisplay.textContent = result;
+            addHistory(x, y, selectedOperation, result);
+        }
+
+        function addHistory(x, y, op, value) {
+            const map = { "1": "+", "2": "−", "3": "×", "4": "÷" };
+            const item = document.createElement("li");
+            item.textContent = `${x} ${map[op]} ${y} = ${value}`;
+            historyList.prepend(item);
+            if (historyList.children.length > 5) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        function setTheme(isDark) {
+            document.body.classList.toggle("dark", isDark);
+            themeToggle.textContent = isDark ? "☀️ Light" : "🌙 Dark";
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+        }
+
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        setTheme(savedTheme ? savedTheme === "dark" : prefersDark);
+
+        themeToggle.addEventListener("click", () => {
+            setTheme(!document.body.classList.contains("dark"));
+        });
+
+        calculateBtn.addEventListener("click", calculate);
+    </script>
+</body>
+</html>
